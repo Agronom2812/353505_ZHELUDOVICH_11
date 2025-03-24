@@ -3,7 +3,9 @@ from dotenv import load_dotenv
 import square
 import circle
 
-load_dotenv()
+env_path = $HOME/353505_ZHELUDOVICH_11/IGI/LR2/
+
+load_dotenv(env_path)
 
 try:
     r = int(os.getenv('CIRCLE_RADIUS'))
