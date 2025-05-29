@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load book_extras %}
+
+{% block title %}Статистика - BookStore{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Debug output -->
+    <div class="d-block">
+        <pre>
+Debug Data:
+Genre Labels: {{ genre_labels }}
+Genre Data: {{ genre_data }}
+Age Labels: {{ age_labels }}
+Age Data: {{ age_data }}
+        </pre>
+    </div>
+
+    <h2 class="mb-4">Статистика продаж</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Распределение продаж по жанрам</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="genreChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Возрастное распределение покупателей</h4>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Статистика по клиентам -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Клиенты и их покупки</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Клиент</th>
+                                    <th>Кол-во покупок</th>
+                                    <th>Общая сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customer_stats %}
+                                <tr>
+                                    <td>{{ customer.username }}</td>
+                                    <td>{{ customer.purchase_count }}</td>
+                                    <td>{{ customer.total_spent|floatformat:2 }} BYN</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по товарам -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Продажи по товарам</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Книга</th>
+                                    <th>Продано</th>
+                                    <th>Сумма продаж</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for book in book_stats %}
+                                <tr>
+                                    <td>{{ book.title }}</td>
+                                    <td>{{ book.quantity_sold }}</td>
+                                    <td>{{ book.total_sales|floatformat:2 }} BYN</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Статистические показатели по продажам -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Показатели по продажам</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Среднее значение
+                            <span>{{ sales_stats.average|floatformat:2 }} BYN</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Медиана
+                            <span>{{ sales_stats.median|floatformat:2 }} BYN</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Мода
+                            <span>{{ sales_stats.mode|floatformat:2 }} BYN</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по возрасту клиентов -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Возраст клиентов</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Средний возраст
+                            <span>{{ age_stats.average|floatformat:1 }} лет</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Медианный возраст
+                            <span>{{ age_stats.median|floatformat:1 }} лет</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Популярность и прибыльность жанров -->
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Анализ жанров</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Самый популярный жанр</h5>
+                            <p class="lead">{{ most_popular_genre.0 }} ({{ most_popular_genre.1 }} продаж)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Самый прибыльный жанр</h5>
+                            <p class="lead">{{ most_profitable_genre.0 }} ({{ most_profitable_genre.1|floatformat:2 }} BYN)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Подготовка данных для графиков
+const genreLabels = {{ genre_labels|safe }};
+const genreData = {{ genre_data|safe }};
+const ageLabels = {{ age_labels|safe }};
+const ageData = {{ age_data|safe }};
+
+// График распределения по жанрам (Pie Chart)
+new Chart(document.getElementById('genreChart'), {
+    type: 'pie',
+    data: {
+        labels: genreLabels,
+        datasets: [{
+            data: genreData,
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right'
+            }
+        }
+    }
+});
+
+// График возрастного распределения (Bar Chart)
+new Chart(document.getElementById('ageChart'), {
+    type: 'bar',
+    data: {
+        labels: ageLabels,
+        datasets: [{
+            label: 'Количество покупателей',
+            data: ageData,
+            backgroundColor: '#36A2EB'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %} 

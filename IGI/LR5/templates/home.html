@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">Книжный магазин</h1>
+            
+            {% if latest_article %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Последние новости</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="h4">{{ latest_article.title }}</h2>
+                    {% if latest_article.image %}
+                        <img src="{{ latest_article.image.url }}" class="img-fluid mb-3" alt="{{ latest_article.title }}">
+                    {% endif %}
+                    <p class="card-text">{{ latest_article.short_description }}</p>
+                    <a href="{% url 'content:news-detail' latest_article.pk %}" class="btn btn-primary">Читать далее</a>
+                </div>
+                <div class="card-footer text-muted">
+                    Опубликовано {{ latest_article.created_at|date:"d.m.Y" }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Быстрые ссылки</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'books:book-list' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-book me-2"></i> Каталог книг
+                    </a>
+                    <a href="{% url 'content:news' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-newspaper me-2"></i> Новости
+                    </a>
+                    <a href="{% url 'content:promo' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tag me-2"></i> Актуальные промокоды
+                    </a>
+                    <a href="{% url 'content:reviews' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-star me-2"></i> Отзывы
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
