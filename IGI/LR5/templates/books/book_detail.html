@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }} - BookStore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'books:book-list' %}">Каталог</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">{{ book.title }}</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">О книге</h5>
+                    <p class="card-text">{{ book.summary }}</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6>Авторы:</h6>
+                            <ul class="list-unstyled">
+                                {% for author in book.author.all %}
+                                <li>{{ author.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Жанры:</h6>
+                            <ul class="list-unstyled">
+                                {% for genre in book.genre.all %}
+                                <li>{{ genre.name }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <p><strong>Язык:</strong> {{ book.language.name }}</p>
+                            <p><strong>ISBN:</strong> {{ book.ISBN }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Издательство:</strong> {{ book.imprint }}</p>
+                            <p><strong>В наличии:</strong> {{ book.quantity }} шт.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if book.purchases.exists and user.is_staff or user.is_superuser %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">История покупок</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Количество</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for purchase in book.purchases.all|slice:":5" %}
+                                <tr>
+                                    <td>{{ purchase.purchase_date|date:"d.m.Y" }}</td>
+                                    <td>{{ purchase.quantity }} шт.</td>
+                                    <td>{{ purchase.total_price }} BYN</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="fas fa-shopping-cart me-2"></i>Информация о покупке
+                    </h5>
+                    <p class="display-4 text-center my-4">{{ book.price }} BYN</p>
+                    
+                    {% if book.quantity > 0 %}
+                    <p class="text-success">
+                        <i class="fas fa-check-circle me-2"></i>В наличии: {{ book.quantity }} шт.
+                    </p>
+                    {% else %}
+                    <p class="text-danger">
+                        <i class="fas fa-times-circle me-2"></i>Нет в наличии
+                    </p>
+                    {% endif %}
+                    
+                    {% if book.age_restriction > 0 %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Возрастное ограничение: {{ book.age_restriction }}+
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        {% if book.quantity > 0 %}
+                            {% if user.is_authenticated and user.date_of_birth %}
+                                {% with age=user.get_age %}
+                                    {% if age >= book.age_restriction %}
+                                        <a href="{% url 'books:add-to-cart' book.pk %}" class="btn btn-custom-primary btn-lg add-to-cart">
+                                            <i class="fas fa-shopping-cart me-2"></i>Добавить в корзину
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-custom-primary btn-lg" disabled>
+                                            <i class="fas fa-exclamation-triangle me-2"></i>Возрастное ограничение {{ book.age_restriction }}+
+                                        </button>
+                                    {% endif %}
+                                {% endwith %}
+                            {% else %}
+                                <a href="{% url 'books:add-to-cart' book.pk %}" class="btn btn-custom-primary btn-lg add-to-cart">
+                                    <i class="fas fa-shopping-cart me-2"></i>Добавить в корзину
+                                </a>
+                            {% endif %}
+                        {% else %}
+                        <button class="btn btn-custom-primary btn-lg" disabled>
+                            <i class="fas fa-shopping-cart me-2"></i>Нет в наличии
+                        </button>
+                        {% endif %}
+                        <a href="{% url 'books:add-to-favorite' book.pk %}" class="btn btn-custom-secondary add-to-favorite">
+                            <i class="fas fa-heart me-2"></i>В избранное
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addToCartBtn = document.querySelector('.add-to-cart');
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch(this.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.innerHTML = '<i class="fas fa-check me-2"></i>Добавлено в корзину';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-shopping-cart me-2"></i>Добавить в корзину';
+                    }, 2000);
+                } else if (data.status === 'error') {
+                    alert(data.message);
+                }
+            });
+        });
+    }
+
+    const addToFavoriteBtn = document.querySelector('.add-to-favorite');
+    if (addToFavoriteBtn) {
+        addToFavoriteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            fetch(this.href, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'added') {
+                    this.innerHTML = '<i class="fas fa-heart me-2"></i>В избранном';
+                    this.classList.add('active');
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %} 
