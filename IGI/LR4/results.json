@@ -1,0 +1,43 @@
+{
+  "variant11": {
+    "words_with_a_o_digits": [
+      "a1",
+      "b2cd",
+      "3e4f5"
+    ],
+    "is_valid_number": true,
+    "quoted_words_count": 1,
+    "letter_frequency": {
+      "t": 4,
+      "h": 1,
+      "i": 4,
+      "s": 6,
+      "a": 3,
+      "e": 4,
+      "q": 1,
+      "u": 1,
+      "o": 2,
+      "v": 1,
+      "l": 2,
+      "d": 3,
+      "m": 1,
+      "w": 1,
+      "r": 1,
+      "b": 1,
+      "c": 1,
+      "f": 1
+    },
+    "word_pairs": [
+      "a1, b2cd"
+    ]
+  },
+  "common": {
+    "sentences_count": 4,
+    "declarative": 4,
+    "interrogative": 0,
+    "imperative": 0,
+    "avg_sentence_length": 3.0,
+    "avg_word_length": 4.416666666666667,
+    "smiles_count": 3
+  }
+}
