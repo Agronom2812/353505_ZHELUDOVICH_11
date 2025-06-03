@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'analytics.apps.AnalyticsConfig',
     'crispy_forms',
     'crispy_bootstrap5',
+    'api_integrations.apps.ApiIntegrationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -140,6 +141,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # Crispy Forms settings
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+CRISPY_FAIL_SILENTLY = not DEBUG
 
 # Authentication settings
 AUTHENTICATION_BACKENDS = [
@@ -158,7 +160,7 @@ EMAIL_SUBJECT_PREFIX = '[BookStore] '
 
 # API Keys
 GOOGLE_BOOKS_API_KEY = 'your_google_books_api_key'
-OPENWEATHERMAP_API_KEY = 'your_openweathermap_api_key'
+OPENWEATHERMAP_API_KEY = '9b833c0ea6426b70902aa7a4b1da285c'  # Тестовый ключ, замените на свой
 
 # Logging configuration
 LOGGING = {

@@ -4,30 +4,26 @@
 {% block title %}Статистика - BookStore{% endblock %}
 
 {% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 .chart-container {
     position: relative;
-    height: 300px;
-    width: 100%;
     margin-bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.chart-container img {
+    max-width: 100%;
+    height: auto;
+    max-height: 400px; /* Ограничиваем максимальную высоту */
+    object-fit: contain;
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Debug output -->
-    <div class="d-block">
-        <pre>
-Debug Data:
-Genre Labels: {{ genre_labels }}
-Genre Data: {{ genre_data }}
-Age Labels: {{ age_labels }}
-Age Data: {{ age_data }}
-        </pre>
-    </div>
-
     <h2 class="mb-4">Статистика продаж</h2>
 
     <div class="row mb-4">
@@ -38,7 +34,7 @@ Age Data: {{ age_data }}
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
-                        <canvas id="genreChart"></canvas>
+                        <img id="genre-chart" src="data:image/png;base64,{{ genre_chart }}" alt="График распределения по жанрам">
                     </div>
                 </div>
             </div>
@@ -50,7 +46,7 @@ Age Data: {{ age_data }}
                 </div>
                 <div class="card-body">
                     <div class="chart-container">
-                        <canvas id="ageChart"></canvas>
+                        <img id="age-chart" src="data:image/png;base64,{{ age_chart }}" alt="График возрастного распределения">
                     </div>
                 </div>
             </div>
@@ -193,63 +189,31 @@ Age Data: {{ age_data }}
     </div>
 </div>
 
+{% block extra_js %}
 <script>
-// Подготовка данных для графиков
-const genreLabels = {{ genre_labels|safe }};
-const genreData = {{ genre_data|safe }};
-const ageLabels = {{ age_labels|safe }};
-const ageData = {{ age_data|safe }};
-
-// График распределения по жанрам (Pie Chart)
-new Chart(document.getElementById('genreChart'), {
-    type: 'pie',
-    data: {
-        labels: genreLabels,
-        datasets: [{
-            data: genreData,
-            backgroundColor: [
-                '#FF6384',
-                '#36A2EB',
-                '#FFCE56',
-                '#4BC0C0',
-                '#9966FF'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'right'
+function updateCharts() {
+    fetch('{% url "books:get_updated_charts" %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error updating charts:', data.error);
+                return;
             }
-        }
-    }
-});
+            
+            // Обновляем изображения графиков
+            document.getElementById('genre-chart').src = 'data:image/png;base64,' + data.genre_chart;
+            document.getElementById('age-chart').src = 'data:image/png;base64,' + data.age_chart;
+        })
+        .catch(error => {
+            console.error('Error fetching chart data:', error);
+        });
+}
 
-// График возрастного распределения (Bar Chart)
-new Chart(document.getElementById('ageChart'), {
-    type: 'bar',
-    data: {
-        labels: ageLabels,
-        datasets: [{
-            label: 'Количество покупателей',
-            data: ageData,
-            backgroundColor: '#36A2EB'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
-            }
-        }
-    }
-});
+// Обновляем графики каждые 30 секунд
+setInterval(updateCharts, 30000);
+
+// Также обновляем при загрузке страницы
+document.addEventListener('DOMContentLoaded', updateCharts);
 </script>
+{% endblock %}
 {% endblock %} 

@@ -1,7 +1,89 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Главная - Книжный магазин{% endblock %}
+{% block title %}Главная - BookStore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar-container {
+        font-family: monospace;
+        white-space: pre;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .calendar-nav {
+        display: flex;
+        gap: 10px;
+    }
+    .calendar-nav a {
+        text-decoration: none;
+        color: #3498DB;
+        padding: 5px 10px;
+        border: 1px solid #3498DB;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    .calendar-nav a:hover {
+        background-color: #3498DB;
+        color: white;
+    }
+    .calendar-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    .calendar-weekdays {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        color: #3498DB;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .calendar-weekdays span {
+        width: 28px;
+        text-align: center;
+    }
+    .calendar-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 5px 0;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .calendar-day {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+    .current-day {
+        background-color: #3498DB;
+        color: white;
+    }
+    .time-display {
+        background: #3498DB;
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .time-display i {
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -9,6 +91,18 @@
         <div class="col-md-8">
             <h1 class="mb-4">Книжный магазин</h1>
             
+            <!-- Time Display -->
+            <div class="time-display mb-4">
+                <div>
+                    <i class="fas fa-clock"></i>
+                    Текущее время: {{ current_time|date:"H:i:s" }}
+                </div>
+                <div>
+                    <i class="fas fa-globe"></i>
+                    Часовой пояс: {{ timezone_name }}
+                </div>
+            </div>
+
             {% if latest_article %}
             <div class="card mb-4">
                 <div class="card-header">
@@ -27,6 +121,48 @@
                 </div>
             </div>
             {% endif %}
+
+            <!-- Calendar Section -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Календарь</h5>
+                </div>
+                <div class="card-body">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <div class="calendar-nav">
+                                <a href="?month={{ calendar.prev_month }}&year={{ calendar.prev_year }}">
+                                    <i class="fas fa-chevron-left"></i> Предыдущий
+                                </a>
+                            </div>
+                            <div class="calendar-title">{{ calendar.title }}</div>
+                            <div class="calendar-nav">
+                                <a href="?month={{ calendar.next_month }}&year={{ calendar.next_year }}">
+                                    Следующий <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="calendar-weekdays">
+                            {% for day in calendar.weekdays %}
+                            <span>{{ day }}</span>
+                            {% endfor %}
+                        </div>
+                        {% for row in calendar.rows %}
+                        <div class="calendar-row">
+                            {% for day in row %}
+                                {% if day.day %}
+                                <div class="calendar-day {% if day.is_current %}current-day{% endif %}">
+                                    {{ day.day }}
+                                </div>
+                                {% else %}
+                                <div class="calendar-day">{{ day }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div class="col-md-4">
@@ -47,9 +183,29 @@
                     <a href="{% url 'content:reviews' %}" class="list-group-item list-group-item-action">
                         <i class="fas fa-star me-2"></i> Отзывы
                     </a>
+                    <a href="{% url 'content:faq' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-question-circle me-2"></i> Частые вопросы
+                    </a>
+                    <a href="{% url 'content:privacy' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shield-alt me-2"></i> Политика конфиденциальности
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Обновление времени каждую секунду
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString();
+        document.querySelector('.time-display div:first-child').innerHTML = 
+            '<i class="fas fa-clock"></i>Текущее время: ' + timeString;
+    }
+    
+    setInterval(updateTime, 1000);
+</script>
 {% endblock %} 

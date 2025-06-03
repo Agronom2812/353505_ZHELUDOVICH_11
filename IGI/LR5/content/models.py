@@ -10,14 +10,14 @@ class Article(models.Model):
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     short_description = models.TextField(verbose_name="Краткое описание", default="")
     content = models.TextField(verbose_name="Содержание", default="")
-    image = models.ImageField(upload_to='articles/', verbose_name="Изображение", blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(default=timezone.now)
+    image = models.ImageField(upload_to='articles/', default='articles/default.png', verbose_name="Изображение")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
     is_published = models.BooleanField(default=False, verbose_name="Опубликовано")
 
     class Meta:
-        verbose_name = "Статья"
-        verbose_name_plural = "Статьи"
+        verbose_name = "Новость"
+        verbose_name_plural = "Новости"
         ordering = ['-created_at']
 
     def __str__(self):
@@ -71,28 +71,21 @@ class Term(models.Model):
         super().save(*args, **kwargs)
 
 class Employee(models.Model):
-    name = models.CharField(max_length=200, verbose_name="ФИО")
-    position = models.CharField(max_length=200, verbose_name="Должность")
-    description = models.TextField(verbose_name="Описание обязанностей", default="")
-    photo = models.ImageField(upload_to='employees/', verbose_name="Фото", blank=True)
-    phone = models.CharField(max_length=20, verbose_name="Телефон", blank=True)
+    name = models.CharField(max_length=100, verbose_name="ФИО")
+    position = models.CharField(max_length=100, verbose_name="Должность")
+    age = models.IntegerField(verbose_name="Возраст")
+    experience = models.IntegerField(verbose_name="Опыт работы (лет)")
+    photo = models.ImageField(upload_to='employees/', default='employees/default.png', verbose_name="Фото")
+    description = models.TextField(verbose_name="Описание")
     email = models.EmailField(verbose_name="Email")
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(default=timezone.now)
+    phone = models.CharField(max_length=20, verbose_name="Телефон")
 
     class Meta:
         verbose_name = "Сотрудник"
         verbose_name_plural = "Сотрудники"
-        ordering = ['name']
 
     def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.created_at = timezone.now()
-        self.updated_at = timezone.now()
-        super().save(*args, **kwargs)
+        return f"{self.name} - {self.position}"
 
 class Vacancy(models.Model):
     title = models.CharField(max_length=200, verbose_name="Название вакансии")
