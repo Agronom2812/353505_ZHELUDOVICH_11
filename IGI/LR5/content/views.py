@@ -112,3 +112,6 @@ class PromoCodeListView(ListView):
             valid_from__lte=now,
             valid_to__gte=now
         )
+
+class FAQView(TemplateView):
+    template_name = 'content/faq.html'

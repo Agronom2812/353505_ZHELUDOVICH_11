@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    BookListView, BookDetailView, BookCreateView, BookUpdateView, BookDeleteView,
+    BookListView, BookDetailView,
     AuthorListView, AuthorDetailView, AuthorCreateView, AuthorUpdateView, AuthorDeleteView,
     GenreListView, GenreCreateView, GenreUpdateView, GenreDeleteView,
     BookInstanceListView, BookInstanceCreateView, BookInstanceUpdateView, BookInstanceDeleteView,
@@ -14,9 +14,9 @@ urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('books/', BookListView.as_view(), name='book-list'),
     path('books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
-    path('books/create/', BookCreateView.as_view(), name='book-create'),
-    path('books/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),
-    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),
+    path('books/create/', views.create_book, name='book-create'),
+    path('books/<int:pk>/update/', views.edit_book, name='book-update'),
+    path('books/<int:pk>/delete/', views.delete_book, name='book-delete'),
     
     path('authors/', AuthorListView.as_view(), name='author-list'),
     path('authors/<int:pk>/', AuthorDetailView.as_view(), name='author-detail'),
@@ -46,4 +46,5 @@ urlpatterns = [
     
     path('purchase-history/', PurchaseHistoryView.as_view(), name='purchase-history'),
     path('statistics/', StatisticsView.as_view(), name='statistics'),
+    path('statistics/charts/', views.get_updated_charts, name='get_updated_charts'),
 ] 

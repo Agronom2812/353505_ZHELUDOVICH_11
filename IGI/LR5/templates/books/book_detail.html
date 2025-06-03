@@ -13,7 +13,19 @@
 
     <div class="row">
         <div class="col-md-8">
-            <h1 class="mb-4">{{ book.title }}</h1>
+            <div class="d-flex justify-content-between align-items-start mb-4">
+                <h1>{{ book.title }}</h1>
+                {% if user.is_staff or user.is_superuser %}
+                <div class="btn-group">
+                    <a href="{% url 'books:book-update' book.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Редактировать
+                    </a>
+                    <a href="{% url 'books:book-delete' book.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Удалить
+                    </a>
+                </div>
+                {% endif %}
+            </div>
             
             <div class="card mb-4">
                 <div class="card-body">
@@ -107,34 +119,21 @@
                     </div>
                     {% endif %}
                     
+                    {% if user.is_authenticated %}
                     <div class="d-grid gap-2">
-                        {% if book.quantity > 0 %}
-                            {% if user.is_authenticated and user.date_of_birth %}
-                                {% with age=user.get_age %}
-                                    {% if age >= book.age_restriction %}
-                                        <a href="{% url 'books:add-to-cart' book.pk %}" class="btn btn-custom-primary btn-lg add-to-cart">
-                                            <i class="fas fa-shopping-cart me-2"></i>Добавить в корзину
-                                        </a>
-                                    {% else %}
-                                        <button class="btn btn-custom-primary btn-lg" disabled>
-                                            <i class="fas fa-exclamation-triangle me-2"></i>Возрастное ограничение {{ book.age_restriction }}+
-                                        </button>
-                                    {% endif %}
-                                {% endwith %}
-                            {% else %}
-                                <a href="{% url 'books:add-to-cart' book.pk %}" class="btn btn-custom-primary btn-lg add-to-cart">
-                                    <i class="fas fa-shopping-cart me-2"></i>Добавить в корзину
-                                </a>
-                            {% endif %}
-                        {% else %}
-                        <button class="btn btn-custom-primary btn-lg" disabled>
-                            <i class="fas fa-shopping-cart me-2"></i>Нет в наличии
-                        </button>
-                        {% endif %}
-                        <a href="{% url 'books:add-to-favorite' book.pk %}" class="btn btn-custom-secondary add-to-favorite">
+                        <a href="{% url 'books:add-to-cart' book.pk %}" class="btn btn-custom-primary btn-lg add-to-cart" data-book-id="{{ book.pk }}">
+                            <i class="fas fa-shopping-cart me-2"></i>Добавить в корзину
+                        </a>
+                        <a href="{% url 'books:add-to-favorite' book.pk %}" class="btn btn-outline-danger btn-lg add-to-favorite" data-book-id="{{ book.pk }}">
                             <i class="fas fa-heart me-2"></i>В избранное
                         </a>
                     </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Для покупки необходимо <a href="{% url 'users:login' %}">войти</a> в систему
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

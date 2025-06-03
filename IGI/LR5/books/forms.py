@@ -4,14 +4,24 @@ from .models import Book, Author, Genre, Language, BookInstance
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'summary', 'imprint', 'ISBN', 'genre', 'language', 'price', 'unit', 'age_restriction']
-        widgets = {
-            'author': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'genre': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'language': forms.Select(attrs={'class': 'form-control'}),
-            'unit': forms.Select(attrs={'class': 'form-control'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
-            'age_restriction': forms.NumberInput(attrs={'class': 'form-control', 'min': '0', 'max': '21'}),
+        fields = ['title', 'author', 'summary', 'imprint', 'ISBN', 'genre', 'language', 'price', 'unit', 'age_restriction', 'quantity']
+        labels = {
+            'title': 'Название книги',
+            'author': 'Авторы',
+            'summary': 'Краткое содержание',
+            'imprint': 'Издательство',
+            'ISBN': 'ISBN',
+            'genre': 'Жанры',
+            'language': 'Язык',
+            'price': 'Цена (BYN)',
+            'unit': 'Единица измерения',
+            'age_restriction': 'Возрастное ограничение',
+            'quantity': 'Количество',
+        }
+        help_texts = {
+            'age_restriction': 'Укажите возрастное ограничение (от 0 до 21)',
+            'ISBN': 'Введите ISBN книги (13 символов)',
+            'quantity': 'Укажите количество экземпляров книги',
         }
 
 class AuthorForm(forms.ModelForm):
